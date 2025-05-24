@@ -1,0 +1,11 @@
+[project]
+name = "plot-portfolio"
+version = "0.1.0"
+description = "Simple ETrade portfolio analysis and plotting tool"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jupyterlab>=4.4.2",
+    "numpy>=2.2.6",
+    "pandas>=2.2.3",
+]
