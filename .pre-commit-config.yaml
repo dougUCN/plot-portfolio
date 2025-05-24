@@ -1,0 +1,11 @@
+repos:
+  - repo: local
+    hooks:
+      - id: linting
+        name: linting
+        description: Run isort black flake8 pylint
+        entry: bash -c "source .venv/bin/activate && make format"
+        language: python
+        pass_filenames: false
+        always_run: true
+        verbose: true

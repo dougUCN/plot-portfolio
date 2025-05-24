@@ -9,3 +9,48 @@ dependencies = [
     "numpy>=2.2.6",
     "pandas>=2.2.3",
 ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["portfolio_analysis"]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.2.1",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-timeout>=2.2.0",
+]
+dev = [
+    "black>=24.3.0",
+    "isort>=5.0",
+    "flake8>=3.7.9",
+    "pylint>=2.15.5",
+    "pre-commit>=3.7.0",
+    "certifi>=2023.8.30",
+    "boto3>=1.36.4",
+]
+
+[tool.black]
+line-length = 100
+extend-exclude = '''
+  .git
+  .github
+  .hg
+  .mypy_cache
+  .tox
+  .venv
+  _build
+  build
+  dist
+  notebooks
+'''
+
+
+[tool.isort]
+profile = "black"
+include_trailing_comma = true
+line_length = 100
+multi_line_output = 3
+use_parentheses = true
+skip = ["__init__.py", ".venv"]
