@@ -69,12 +69,15 @@ class ETradeParser:
 
     def parse(self) -> None:  # noqa: C901
         """Parse the CSV file and extract position data."""
+        logger.info(f"Parsing ETrade CSV: {self.csv_path}")
+
         # Read the entire file to find the positions section
         with open(self.csv_path, "r") as file:
             content = file.read()
 
         # Find the correct position data header (contains both Symbol and Last Price)
         lines = content.split("\n")
+
         position_start_line = -1
         for i, line in enumerate(lines):
             if "Symbol" in line and "Last Price" in line and "Quantity" in line:
@@ -82,6 +85,7 @@ class ETradeParser:
                 break
 
         if position_start_line == -1:
+            logger.error("Could not find position data header in CSV")
             raise ValueError("Could not find position data header in CSV")
 
         # Extract position content from the header line onwards
@@ -140,9 +144,15 @@ class ETradeParser:
             lot_csv = f"{lot_header}\n" + "\n".join(lot_lines)
             self._lots_df = self._parse_lots_csv(lot_csv)
 
+        logger.info(
+            f"Parsed {len(position_lines)} positions, {len(lot_lines)} lots, "
+            f"cash: ${self._cash_position or 0:.2f}"
+        )
+
     def _create_column_mapping(self, header: str) -> None:
         """Create a mapping from CSV column names to standardized names."""
         header_cols = [col.strip() for col in header.split(",")]
+
         self._column_map = {}
 
         for standard_name, possible_names in self.COLUMN_MAPPINGS.items():
@@ -156,6 +166,7 @@ class ETradeParser:
 
         missing_cols = set(self.REQUIRED_COLUMNS) - mapped_standard_names
         if missing_cols:
+            logger.error(f"Required columns not found: {missing_cols}")
             raise ValueError(f"Required columns not found: {missing_cols}")
 
     def _parse_positions_csv(self, csv_content: str) -> pd.DataFrame:
@@ -263,6 +274,7 @@ class ETradeParser:
                 except ValueError:
                     continue
         self._cash_position = 0.0
+        logger.warning("Could not parse cash position, defaulting to $0.00")
 
     def _is_date(self, value: str) -> bool:
         """Check if a string looks like a date."""
@@ -317,6 +329,7 @@ class ETradeParser:
         cash = self.get_cash_position()
 
         if positions_df is None or positions_df.empty:
+            logger.warning("No positions found in portfolio")
             return {
                 "total_value": cash,
                 "cash_position": cash,
@@ -329,7 +342,7 @@ class ETradeParser:
         total_value = total_position_value + cash
         total_gain_dollar = positions_df["total_gain_dollar"].sum()
 
-        return {
+        summary = {
             "total_value": total_value,
             "total_position_value": total_position_value,
             "cash_position": cash,
@@ -337,6 +350,8 @@ class ETradeParser:
             "total_gain_dollar": total_gain_dollar,
             "average_gain_percent": positions_df["total_gain_percent"].mean(),
         }
+
+        return summary
 
 
 def parse_etrade_csv(csv_path: str) -> Tuple[pd.DataFrame, pd.DataFrame, float, Dict]:

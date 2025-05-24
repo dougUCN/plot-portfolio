@@ -40,6 +40,12 @@ def _setup_logging(
         logging.basicConfig(
             level=default_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
+        # Warning if the config file is not found
+        logger = logging.getLogger(__name__)
+        logger.warning(
+            f"Logging configuration file not found at {path}. "
+            "Using basic configuration with level INFO."
+        )
 
 
 def get_logger(name: str) -> logging.Logger:
