@@ -52,5 +52,5 @@ format: isort black flake8 pylint
 setup-local-dev:
 	mkdir -p logs
 	uv venv
-	uv pip install -e .[dev]
+	uv pip install -e .[dev,test,notebook]
 	uv run pre-commit install
